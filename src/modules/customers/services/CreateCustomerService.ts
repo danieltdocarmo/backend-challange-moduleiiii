@@ -1,4 +1,3 @@
-import { inject, injectable } from 'tsyringe';
 
 import AppError from '@shared/errors/AppError';
 
@@ -10,13 +9,27 @@ interface IRequest {
   email: string;
 }
 
-@injectable()
+
 class CreateCustomerService {
   constructor(private customersRepository: ICustomersRepository) {}
 
   public async execute({ name, email }: IRequest): Promise<Customer> {
-    // TODO
-  }
+
+    const checkEmailExists = await this.customersRepository.findByEmail(email);
+    
+    console.log(checkEmailExists);
+    if(checkEmailExists){
+      throw new AppError('Can not create costumer with email already exists');
+    }
+    
+    const costumer = await this.customersRepository.create({
+      name,
+      email
+    });
+
+    return costumer;
+  
+    }
 }
 
 export default CreateCustomerService;
